@@ -7,8 +7,11 @@ use App\Application\Controllers\UserController;
 use App\Application\HttpResponder;
 use App\Domain\Services\UserService;
 use App\Domain\UseCases\GetUsersUseCase;
+use App\Application\Controllers\LoginController;
+use App\Domain\UseCases\LoginUserUseCase;
 use App\Infrastructure\Persistence\MySqlUserRepository;
 use App\Infrastructure\Database\DatabaseConnection;
+use App\Domain\Services\AuthService;
 
 class UserRoutes
 {
@@ -31,5 +34,16 @@ class UserRoutes
 
         // Configura la ruta correctamente
         $router->get('/users', [$userController, 'getUsers']);
+
+        // Crear las dependencias necesarias para el controlador de login
+        $loginUserUseCase = new LoginUserUseCase($userRepository);
+        $httpResponder = new HttpResponder();
+        $authService = new AuthService();
+
+        // Instanciar el controlador de Login
+        $loginController = new LoginController($loginUserUseCase, $httpResponder, $authService);
+
+        // Configurar la ruta de login
+        $router->post('/login', [$loginController, 'login']);
     }
 }

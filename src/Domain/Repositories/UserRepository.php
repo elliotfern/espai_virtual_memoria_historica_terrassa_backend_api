@@ -8,4 +8,6 @@ use App\Domain\Entities\User;
 interface UserRepository
 {
     public function findAll(): array;
+
+    public function findByEmail(string $email): ?User;
 }

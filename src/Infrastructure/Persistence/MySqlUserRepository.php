@@ -19,14 +19,35 @@ class MySqlUserRepository implements UserRepository
 
     public function findAll(): array
     {
-        $stmt = $this->pdo->query("SELECT id, nom AS name, email FROM auth_users ");
+        $stmt = $this->pdo->query("SELECT id, nom, email, password FROM auth_users ");
         $users = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
         $userEntities = [];
         foreach ($users as $userData) {
-            $userEntities[] = new User($userData['id'], $userData['name'], $userData['email']);
+            $userEntities[] = new User($userData['id'], $userData['nom'], $userData['email'], $userData['password']);
         }
 
         return $userEntities;
+    }
+
+    public function findByEmail(string $email): ?User
+    {
+        $stmt = $this->pdo->prepare("SELECT * FROM auth_users WHERE email = :email");
+        $stmt->execute(['email' => $email]);
+        $user = $stmt->fetch(\PDO::FETCH_ASSOC);
+
+        // Verificamos que los campos importantes estén presentes
+        $id = $user['id'] ?? null;
+        $email = $user['email'] ?? null;
+        $password = $user['password'] ?? null;
+        $nom = $user['nom'] ?? null;
+
+        // Si los valores requeridos no están presentes, retornamos null
+        if (!$id || !$email || !$password) {
+            return null;
+        }
+
+        // Creamos y devolvemos un objeto User
+        return new User($id, $nom, $email, $password);
     }
 }

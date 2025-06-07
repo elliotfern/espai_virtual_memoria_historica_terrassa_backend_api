@@ -2,7 +2,7 @@
 
 namespace App\Utils;
 
-class Response
+class ResponseApi
 {
     public static function success(string $message = '', $data = null): void
     {

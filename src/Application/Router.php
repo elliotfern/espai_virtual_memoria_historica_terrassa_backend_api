@@ -13,6 +13,11 @@ class Router implements RouterInterface
         $this->routes[] = ['method' => 'GET', 'route' => $route, 'handler' => $handler];
     }
 
+    public function post(string $route, callable $handler): void
+    {
+        $this->routes[] = ['method' => 'POST', 'route' => $route, 'handler' => $handler];
+    }
+
     public function match(string $uri): ?array
     {
         // Comprobamos si alguna de las rutas coincide con la URI
