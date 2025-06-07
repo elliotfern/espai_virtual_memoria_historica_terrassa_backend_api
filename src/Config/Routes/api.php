@@ -1,7 +1,7 @@
 <?php
 
-define("APP_API", '/api');
-define("BACKEND_API", 'src/backend/api');
+define("APP_API", '');
+define("BACKEND_API", 'src/api');
 define("BACKEND_URL", 'public/intranet');
 define("DOMAIN", 'https://dev.memoriaterrassa.cat');
 

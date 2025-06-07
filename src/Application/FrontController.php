@@ -9,7 +9,6 @@ class FrontController
 {
     private string $requestUri;
     private RouterInterface $apiRouter;
-
     private HttpResponderInterface $responder;
 
     public function __construct(
@@ -26,9 +25,15 @@ class FrontController
     {
         $requestUri = $this->requestUri;
 
-        if (str_starts_with($requestUri, '/')) {
-            $match = $this->apiRouter->match($requestUri);
-            $this->responder->respondToApiRoute($match['routeInfo'] ?? null, $match['params'] ?? []);
+        // Intentamos hacer match con la URI
+        $match = $this->apiRouter->match($requestUri);
+
+        if ($match) {
+            // Si encontramos una coincidencia, procesamos la respuesta
+            $this->responder->respondToApiRoute($match['routeInfo'], $match['params']);
+        } else {
+            // Si no se encuentra una coincidencia, respondemos con un error 404
+            $this->responder->respondWithError(404, 'Ruta no encontrada');
         }
     }
 }

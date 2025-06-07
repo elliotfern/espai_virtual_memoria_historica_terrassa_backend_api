@@ -4,11 +4,6 @@ namespace App\Application\Contract;
 
 interface RouterInterface
 {
-    /**
-     * Devuelve la ruta y los parámetros coincidentes.
-     *
-     * @param string $uri
-     * @return array{routeInfo: mixed|null, params: array}
-     */
-    public function match(string $uri): array;
+    public function get(string $route, callable $handler);
+    public function match(string $uri): ?array; // El router debe devolver la información de la ruta
 }

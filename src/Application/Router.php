@@ -4,46 +4,25 @@ namespace App\Application;
 
 use App\Application\Contract\RouterInterface;
 
-
 class Router implements RouterInterface
 {
-    private array $routes;
+    private array $routes = [];
 
-    public function __construct(array $routes)
+    public function get(string $route, callable $handler): void
     {
-        $this->routes = $routes;
+        $this->routes[] = ['method' => 'GET', 'route' => $route, 'handler' => $handler];
     }
 
-    /**
-     * @param string $requestUri
-     * @return array [ 'routeInfo' => array|null, 'params' => array ]
-     */
-    public function match(string $requestUri): array
+    public function match(string $uri): ?array
     {
-        $requestUri = rtrim($requestUri, '/');
-        if ($requestUri === '') {
-            $requestUri = '/';
-        }
-
-        foreach ($this->routes as $routePattern => $routeInfo) {
-            // Convertir patrones con parámetros {param} a regex
-            $pattern = preg_replace('/\{[a-zA-Z0-9_]+\}/', '([a-zA-Z0-9_-]+)', $routePattern);
-            $pattern = '#^' . $pattern . '$#';
-
-            if (preg_match($pattern, $requestUri, $matches)) {
-                // Extraer parámetros (sin el primer elemento que es la ruta completa)
-                $params = array_slice($matches, 1);
-                return [
-                    'routeInfo' => $routeInfo,
-                    'params' => $params,
-                ];
+        // Comprobamos si alguna de las rutas coincide con la URI
+        foreach ($this->routes as $route) {
+            if ($route['route'] === $uri) {
+                return ['routeInfo' => $route, 'params' => []];
             }
         }
 
-        // Ruta no encontrada
-        return [
-            'routeInfo' => null,
-            'params' => [],
-        ];
+        // Si no hay coincidencia, retornamos null
+        return null;
     }
 }

@@ -1,12 +1,11 @@
 <?php
 // bootstrap.php
 
+use App\Infrastructure\Database\DatabaseConnection;
 use App\Application\Router;
 use App\Application\HttpResponder;
 use App\Application\FrontController;
-use App\Application\Security\CheckSessionUseCase;
-use App\Infrastructure\Security\JWTSessionVerifier;
-use App\Infrastructure\Middleware\AuthMiddleware;
+use App\Application\Routes\UserRoutes;
 
 // Cargar librerías externas
 require_once __DIR__ . '/vendor/autoload.php';
@@ -16,27 +15,27 @@ $envName = $_ENV['APP_ENV'] ?? 'prod'; // default: prod
 $dotenv = Dotenv\Dotenv::createImmutable(__DIR__ . '/', '.env.' . $envName);
 $dotenv->load();
 
-// Carga rutas
-$apiRoutes = require __DIR__ . '/src/Config/Routes/api.php';
+// Configuración de base de datos
+$host = $_ENV['DB_HOST'] ?? null;
+$user = $_ENV['DB_USER'] ?? null;
+$password = $_ENV['DB_PASS'] ?? null;
+$dbName = $_ENV['DB_DBNAME'] ?? null;
 
-// Crea routers
-$apiRouter = new Router($apiRoutes);
+// Crear conexión a la base de datos
+$databaseConnection = new DatabaseConnection($host, $dbName, $user, $password);
 
-// Crea middleware de sesión
-$sessionVerifier = new JWTSessionVerifier();
-$checkSessionUseCase = new CheckSessionUseCase($sessionVerifier);
-$authMiddleware = new AuthMiddleware($checkSessionUseCase);
+// Crear router
+$router = new Router(); // Aquí instanciamos la implementación concreta de Router
 
-// Crea servicios de vista y traducción
-// Inicia servicios
-$responder = new HttpResponder($authMiddleware);
+// Crear responder
+$responder = new HttpResponder();
 
-// Inyecta todo al FrontController (ojo que el orden de parámetros debe coincidir con el constructor)
-$frontController = new FrontController(
-    $requestUri,
-    $apiRouter,           // Router implements RouterInterface
-    $responder            // HttpResponder implements HttpResponderInterface
-);
+// Configura las rutas de los usuarios (ahora pasando la conexión a la base de datos)
+UserRoutes::configure($router, $databaseConnection);
 
-// Lanza la aplicación
+// Crear FrontController
+$requestUri = $_SERVER['REQUEST_URI'];
+$frontController = new FrontController($requestUri, $router, $responder);
+
+// Ejecutar la aplicación
 $frontController->handleRequest();

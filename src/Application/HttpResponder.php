@@ -3,40 +3,35 @@
 namespace App\Application;
 
 use App\Application\Contract\HttpResponderInterface;
-use App\Infrastructure\Middleware\AuthMiddleware;
+
 
 class HttpResponder implements HttpResponderInterface
 {
-    private AuthMiddleware $authMiddleware;
 
-    public function __construct(AuthMiddleware $authMiddleware)
+    public function respondWithJson(array $data): void
     {
-        $this->authMiddleware = $authMiddleware;
+        header('Content-Type: application/json');
+        echo json_encode($data);
+        exit();
     }
 
-    public function respondToApiRoute($routeInfo, array $params): void
+    public function respondWithData(int $status, array $data): void
     {
-        header('Content-Type: application/json; charset=utf-8');
+        http_response_code($status);
+        header('Content-Type: application/json');
+        echo json_encode($data);
+    }
 
-        if ($routeInfo === null) {
-            http_response_code(404);
-            echo json_encode(['error' => 'API endpoint not found']);
-            return;
-        }
+    public function respondWithError(int $status, string $message): void
+    {
+        http_response_code($status);
+        header('Content-Type: application/json');
+        echo json_encode(['error' => $message]);
+    }
 
-        $needsAuth = $routeInfo['needs_auth'] ?? false;
-        if ($needsAuth) {
-            $this->authMiddleware->handle();
-        }
-
-        $viewPath = __DIR__ . '/../../../' . $routeInfo['view'];
-
-        if (file_exists($viewPath)) {
-            extract($params);
-            include $viewPath;
-        } else {
-            http_response_code(404);
-            echo json_encode(['error' => 'API handler not found']);
-        }
+    public function respondToApiRoute(array $routeInfo, array $params): void
+    {
+        // Llamamos al handler de la ruta, que es el controlador
+        call_user_func($routeInfo['handler']);
     }
 }
