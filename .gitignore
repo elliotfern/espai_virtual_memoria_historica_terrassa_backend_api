@@ -1,0 +1,21 @@
+# Ignorar archivos y directorios generados por el sistema operativo
+.DS_Store
+Thumbs.db
+
+# Ignorar logs y archivos temporales
+/logs/
+/temp/
+
+# Ignorar directorio de dependencias (ejemplo para PHP y Composer)
+/vendor/
+/public/img/
+/.vscode/
+
+# Ignorar archivos de configuración local (ejemplo para PHP)
+.env.dev
+.env.prod
+.env.test
+pass.txt
+contra.php
+memoria_intranet.code-workspace
+error_log
